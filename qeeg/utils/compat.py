@@ -12,7 +12,7 @@ import warnings
 from packaging import version
 
 from qeeg.utils.logging import get_logger
-from qeeg.utils.exceptions import EEGError
+from qeeg.utils.exceptions import QEEGError
 
 # Get logger
 logger = get_logger(__name__)
@@ -206,7 +206,7 @@ def check_dependencies(
             warnings.warn(message, UserWarning)
     
     if not all_minimum_met and raise_error:
-        raise EEGError("Some dependencies do not meet minimum version requirements")
+        raise QEEGError("Some dependencies do not meet minimum version requirements")
     
     return results
 
