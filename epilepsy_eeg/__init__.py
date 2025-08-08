@@ -6,6 +6,7 @@ This package provides modules for:
 - Analysis: Spectral analysis, asymmetry analysis, Brodmann area analysis, and epileptiform activity detection
 - Conditions: Assessment of neurological conditions (ADHD, depression, anxiety, etc.)
 - Visualization: EEG visualization tools
+- ML: Machine learning for EEG classification and prediction
 - Utils: Utility functions for EEG analysis
 """
 
@@ -13,6 +14,7 @@ from . import preprocessing
 from . import analysis
 from . import conditions
 from . import visualization
+from . import ml
 from . import utils
 
 __version__ = '0.1.0'
@@ -20,4 +22,4 @@ __author__ = 'EEG Analysis Team'
 __email__ = 'example@example.com'
 __license__ = 'MIT'
 
-__all__ = ['preprocessing', 'analysis', 'conditions', 'visualization', 'utils']
+__all__ = ['preprocessing', 'analysis', 'conditions', 'visualization', 'ml', 'utils']
