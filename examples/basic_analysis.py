@@ -1,5 +1,5 @@
 """
-Basic EEG analysis example using the epilepsy_eeg package.
+Basic EEG analysis example using the qeeg package.
 
 This example demonstrates how to:
 1. Load EEG data
@@ -14,7 +14,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import mne
-import epilepsy_eeg as eeg
+import qeeg
 
 # Set random seed for reproducibility
 np.random.seed(42)
@@ -77,12 +77,12 @@ def main():
     print("\nStep 1: Preprocessing the data...")
     
     # Apply bandpass filter
-    raw_filtered = eeg.preprocessing.filtering.bandpass_filter(
+    raw_filtered = qeeg.preprocessing.filtering.bandpass_filter(
         raw, l_freq=1.0, h_freq=40.0
     )
     
     # Remove artifacts using ICA
-    raw_cleaned = eeg.preprocessing.artifacts.remove_artifacts_ica(
+    raw_cleaned = qeeg.preprocessing.artifacts.remove_artifacts_ica(
         raw_filtered, n_components=10
     )
     
@@ -90,7 +90,7 @@ def main():
     print("\nStep 2: Performing spectral analysis...")
     
     # Compute power in frequency bands
-    band_powers = eeg.analysis.spectral.compute_band_powers(raw_cleaned)
+    band_powers = qeeg.analysis.spectral.compute_band_powers(raw_cleaned)
     
     # Print average power in each band
     print("\nAverage power in each frequency band:")
@@ -101,38 +101,38 @@ def main():
     print("\nStep 3: Detecting epileptiform activity...")
     
     # Detect spikes
-    spikes = eeg.analysis.epileptiform.detect_spikes(raw_cleaned)
+    spikes = qeeg.analysis.epileptiform.detect_spikes(raw_cleaned)
     print(f"Detected {len(spikes)} spikes.")
     
     # Detect OIRDA and FIRDA
-    oirda = eeg.analysis.epileptiform.detect_oirda(raw_cleaned)
-    firda = eeg.analysis.epileptiform.detect_firda(raw_cleaned)
+    oirda = qeeg.analysis.epileptiform.detect_oirda(raw_cleaned)
+    firda = qeeg.analysis.epileptiform.detect_firda(raw_cleaned)
     print(f"Detected {len(oirda)} OIRDA events and {len(firda)} FIRDA events.")
     
     # Step 4: Analyze asymmetry
     print("\nStep 4: Analyzing asymmetry...")
     
     # Compute asymmetry indices
-    asymmetry_indices = eeg.analysis.asymmetry.compute_asymmetry_index(raw_cleaned)
+    asymmetry_indices = qeeg.analysis.asymmetry.compute_asymmetry_index(raw_cleaned)
     
     # Print asymmetry indices
     print("\nAsymmetry indices:")
     for pair, index in asymmetry_indices.items():
-        severity = eeg.analysis.asymmetry.classify_asymmetry_severity(index)
+        severity = qeeg.analysis.asymmetry.classify_asymmetry_severity(index)
         print(f"{pair}: {index:.4f} ({severity})")
     
     # Step 5: Analyze Brodmann areas
     print("\nStep 5: Analyzing Brodmann areas...")
     
     # Map channels to Brodmann areas
-    channel_to_areas = eeg.analysis.brodmann.map_channels_to_brodmann(raw_cleaned)
+    channel_to_areas = qeeg.analysis.brodmann.map_channels_to_brodmann(raw_cleaned)
     
     # Print mapping for a few channels
     print("\nBrodmann areas for selected channels:")
     for ch_name in raw_cleaned.ch_names[:5]:
         areas = channel_to_areas.get(ch_name, [])
         if areas:
-            area_functions = [f"Area {area} ({eeg.analysis.brodmann.get_brodmann_function(area)})" for area in areas]
+            area_functions = [f"Area {area} ({qeeg.analysis.brodmann.get_brodmann_function(area)})" for area in areas]
             print(f"{ch_name}: {', '.join(area_functions)}")
         else:
             print(f"{ch_name}: No Brodmann areas mapped")
@@ -157,7 +157,7 @@ def main():
     
     # Plot the power spectrum
     fig, ax = plt.subplots(figsize=(10, 6))
-    psds, freqs = eeg.analysis.spectral.compute_psd(raw_cleaned)
+    psds, freqs = qeeg.analysis.spectral.compute_psd(raw_cleaned)
     for i, ch_name in enumerate(raw_cleaned.ch_names[:5]):
         ax.semilogy(freqs, psds[i], label=ch_name)
     ax.set_xlabel('Frequency (Hz)')

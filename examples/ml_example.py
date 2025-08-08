@@ -1,5 +1,5 @@
 """
-Machine learning example using the epilepsy_eeg package.
+Machine learning example using the qeeg package.
 
 This example demonstrates how to:
 1. Load EEG data
@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 import mne
-import epilepsy_eeg as eeg
+import qeeg
 
 # Set random seed for reproducibility
 np.random.seed(42)
@@ -113,10 +113,10 @@ def main():
     features_list = []
     for raw in raw_list:
         # Preprocess the data
-        raw_filtered = eeg.preprocessing.filtering.bandpass_filter(raw, l_freq=1.0, h_freq=40.0)
+        raw_filtered = qeeg.preprocessing.filtering.bandpass_filter(raw, l_freq=1.0, h_freq=40.0)
         
         # Extract features
-        features_dict = eeg.ml.features.extract_all_features(
+        features_dict = qeeg.ml.features.extract_all_features(
             raw_filtered,
             include_wavelet=False,  # Exclude wavelet features for speed
             include_connectivity=True
@@ -141,7 +141,7 @@ def main():
     # Random Forest
     print("\nRandom Forest Classifier:")
     rf_clf = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf_pipeline, rf_metrics = eeg.ml.classification.train_model(
+    rf_pipeline, rf_metrics = qeeg.ml.classification.train_model(
         X, labels, rf_clf, test_size=0.3, n_features=20
     )
     print(f"Accuracy: {rf_metrics['accuracy']:.2f}")
@@ -152,7 +152,7 @@ def main():
     # Support Vector Machine
     print("\nSupport Vector Machine Classifier:")
     svm_clf = SVC(probability=True, random_state=42)
-    svm_pipeline, svm_metrics = eeg.ml.classification.train_model(
+    svm_pipeline, svm_metrics = qeeg.ml.classification.train_model(
         X, labels, svm_clf, test_size=0.3, n_features=20
     )
     print(f"Accuracy: {svm_metrics['accuracy']:.2f}")
@@ -164,13 +164,13 @@ def main():
     print("\nStep 5: Performing cross-validation...")
     
     # Random Forest
-    rf_cv_results = eeg.ml.classification.cross_validate_model(
+    rf_cv_results = qeeg.ml.classification.cross_validate_model(
         X, labels, rf_clf, cv=5, n_features=20
     )
     print(f"Random Forest CV Accuracy: {rf_cv_results['mean_score']:.2f} ± {rf_cv_results['std_score']:.2f}")
     
     # Support Vector Machine
-    svm_cv_results = eeg.ml.classification.cross_validate_model(
+    svm_cv_results = qeeg.ml.classification.cross_validate_model(
         X, labels, svm_clf, cv=5, n_features=20
     )
     print(f"SVM CV Accuracy: {svm_cv_results['mean_score']:.2f} ± {svm_cv_results['std_score']:.2f}")
@@ -179,12 +179,12 @@ def main():
     print("\nStep 6: Evaluating on the full dataset...")
     
     # Random Forest
-    rf_eval = eeg.ml.classification.evaluate_model(
+    rf_eval = qeeg.ml.classification.evaluate_model(
         rf_pipeline, X, labels, class_names=['Normal', 'Abnormal']
     )
     
     # Support Vector Machine
-    svm_eval = eeg.ml.classification.evaluate_model(
+    svm_eval = qeeg.ml.classification.evaluate_model(
         svm_pipeline, X, labels, class_names=['Normal', 'Abnormal']
     )
     
@@ -195,7 +195,7 @@ def main():
     os.makedirs('examples/output', exist_ok=True)
     
     # Plot confusion matrices
-    rf_cm_fig = eeg.ml.classification.plot_confusion_matrix(
+    rf_cm_fig = qeeg.ml.classification.plot_confusion_matrix(
         rf_eval['confusion_matrix'],
         class_names=['Normal', 'Abnormal'],
         title='Random Forest Confusion Matrix',
@@ -205,7 +205,7 @@ def main():
     rf_cm_fig.savefig('examples/output/rf_confusion_matrix.png')
     print("Saved Random Forest confusion matrix to examples/output/rf_confusion_matrix.png")
     
-    svm_cm_fig = eeg.ml.classification.plot_confusion_matrix(
+    svm_cm_fig = qeeg.ml.classification.plot_confusion_matrix(
         svm_eval['confusion_matrix'],
         class_names=['Normal', 'Abnormal'],
         title='SVM Confusion Matrix',
@@ -217,7 +217,7 @@ def main():
     
     # Plot ROC curves if available
     if 'roc_curve' in rf_eval:
-        rf_roc_fig = eeg.ml.classification.plot_roc_curve(
+        rf_roc_fig = qeeg.ml.classification.plot_roc_curve(
             rf_eval['roc_curve']['fpr'],
             rf_eval['roc_curve']['tpr'],
             rf_eval['roc_auc'],
@@ -229,7 +229,7 @@ def main():
         print("Saved Random Forest ROC curve to examples/output/rf_roc_curve.png")
     
     if 'roc_curve' in svm_eval:
-        svm_roc_fig = eeg.ml.classification.plot_roc_curve(
+        svm_roc_fig = qeeg.ml.classification.plot_roc_curve(
             svm_eval['roc_curve']['fpr'],
             svm_eval['roc_curve']['tpr'],
             svm_eval['roc_auc'],
@@ -242,10 +242,10 @@ def main():
     
     # Step 8: Save the models
     print("\nStep 8: Saving the models...")
-    eeg.ml.classification.save_model(rf_pipeline, 'examples/output/rf_model.joblib')
+    qeeg.ml.classification.save_model(rf_pipeline, 'examples/output/rf_model.joblib')
     print("Saved Random Forest model to examples/output/rf_model.joblib")
     
-    eeg.ml.classification.save_model(svm_pipeline, 'examples/output/svm_model.joblib')
+    qeeg.ml.classification.save_model(svm_pipeline, 'examples/output/svm_model.joblib')
     print("Saved SVM model to examples/output/svm_model.joblib")
     
     print("\nMachine learning example completed!")

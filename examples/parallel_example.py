@@ -1,5 +1,5 @@
 """
-Parallel processing example using the epilepsy_eeg package.
+Parallel processing example using the qeeg package.
 
 This example demonstrates how to:
 1. Use parallel processing for feature extraction
@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 import mne
-import epilepsy_eeg as eeg
+import qeeg
 
 # Set random seed for reproducibility
 np.random.seed(42)
@@ -114,16 +114,16 @@ def main():
     start_time = time.time()
     filtered_list_seq = []
     for raw in raw_list:
-        filtered = eeg.preprocessing.filtering.bandpass_filter(raw, l_freq=1.0, h_freq=40.0)
+        filtered = qeeg.preprocessing.filtering.bandpass_filter(raw, l_freq=1.0, h_freq=40.0)
         filtered_list_seq.append(filtered)
     seq_time = time.time() - start_time
     print(f"Sequential preprocessing time: {seq_time:.2f} seconds")
     
     # Parallel preprocessing
     start_time = time.time()
-    filtered_list_par = eeg.utils.parallel.parallel_preprocess(
+    filtered_list_par = qeeg.utils.parallel.parallel_preprocess(
         raw_list,
-        eeg.preprocessing.filtering.bandpass_filter,
+        qeeg.preprocessing.filtering.bandpass_filter,
         l_freq=1.0,
         h_freq=40.0
     )
@@ -138,7 +138,7 @@ def main():
     start_time = time.time()
     features_list_seq = []
     for raw in filtered_list_par:
-        features = eeg.ml.features.extract_all_features(
+        features = qeeg.ml.features.extract_all_features(
             raw,
             include_wavelet=False,  # Exclude wavelet features for speed
             include_connectivity=True
@@ -149,9 +149,9 @@ def main():
     
     # Parallel feature extraction
     start_time = time.time()
-    features_list_par = eeg.utils.parallel.parallel_extract_features(
+    features_list_par = qeeg.utils.parallel.parallel_extract_features(
         filtered_list_par,
-        eeg.ml.features.extract_all_features,
+        qeeg.ml.features.extract_all_features,
         include_wavelet=False,  # Exclude wavelet features for speed
         include_connectivity=True
     )
@@ -207,7 +207,7 @@ def main():
     
     # Parallel cross-validation
     start_time = time.time()
-    cv_results_par = eeg.utils.parallel.parallel_cross_validation(
+    cv_results_par = qeeg.utils.parallel.parallel_cross_validation(
         X, labels, rf_factory, cv=5
     )
     par_time = time.time() - start_time
@@ -270,7 +270,7 @@ def main():
     
     # Parallel grid search
     start_time = time.time()
-    grid_results_par = eeg.utils.parallel.parallel_grid_search(
+    grid_results_par = qeeg.utils.parallel.parallel_grid_search(
         X, labels, rf_factory, param_grid, cv=5
     )
     par_time = time.time() - start_time
