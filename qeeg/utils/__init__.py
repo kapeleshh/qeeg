@@ -25,13 +25,11 @@ from . import parallel
 # Import key classes and functions from exceptions
 from .exceptions import (
     QEEGError,
+    DataQualityError,
     ProcessingError,
-    AnalysisError,
-    VisualizationError,
-    MLError,
     ValidationError,
-    IOError,
-    ParallelError
+    ConfigurationError,
+    DependencyError
 )
 
 # Import key functions from logging
@@ -108,13 +106,11 @@ __all__ = [
     
     # Exception classes
     'QEEGError',
+    'DataQualityError',
     'ProcessingError',
-    'AnalysisError',
-    'VisualizationError',
-    'MLError',
     'ValidationError',
-    'IOError',
-    'ParallelError',
+    'ConfigurationError',
+    'DependencyError',
     
     # Logging functions
     'setup_logger',
