@@ -5,7 +5,7 @@ Tests for the filtering module.
 import numpy as np
 import pytest
 import mne
-from epilepsy_eeg.preprocessing import filtering
+from qeeg.preprocessing import filtering
 
 
 def create_test_raw():

@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 from unittest.mock import patch, MagicMock
 
-from epilepsy_eeg.utils.parallel import parallel_process
+from qeeg.utils.parallel import parallel_process
 
 
 def test_parallel_process():
