@@ -4,9 +4,9 @@ setup(
     name="qeeg",
     version="0.1.0",
     description="Quantitative EEG analysis toolkit for neurological conditions",
-    author="Your Name",
-    author_email="your.email@example.com",
-    url="https://github.com/yourusername/qeeg",
+    author="Kapeleshh KS",
+    author_email="kapeleshh@gmail.com",
+    url="https://github.com/kapeleshh/qeeg",
     packages=find_packages(),
     install_requires=[
         "numpy>=1.20.0",
@@ -15,6 +15,8 @@ setup(
         "mne>=1.0.0",
         "nibabel>=3.2.0",
         "nilearn>=0.8.0",
+        "pywavelets>=1.3.0",
+        "psutil>=5.9.0",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
