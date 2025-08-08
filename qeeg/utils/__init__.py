@@ -74,11 +74,9 @@ from .validation import (
     validate_options,
     validate_raw,
     validate_epochs,
-    validate_array,
     validate_function_params,
-    validate_frequency_bands,
-    validate_picks,
-    input_validator
+    validate_montage,
+    validate_channel_names
 )
 
 # Import key functions from cache
@@ -93,7 +91,14 @@ from .cache import (
 )
 
 # Import key functions from parallel
-from .parallel import parallel_process
+from .parallel import (
+    parallel_apply,
+    parallel_extract_features,
+    parallel_preprocess,
+    parallel_detect_events,
+    parallel_cross_validation,
+    parallel_grid_search
+)
 
 # Define __all__ to control what is imported with "from qeeg.utils import *"
 __all__ = [
@@ -151,11 +156,9 @@ __all__ = [
     'validate_options',
     'validate_raw',
     'validate_epochs',
-    'validate_array',
     'validate_function_params',
-    'validate_frequency_bands',
-    'validate_picks',
-    'input_validator',
+    'validate_montage',
+    'validate_channel_names',
     
     # Cache functions and classes
     'get_cache_dir',
@@ -167,5 +170,10 @@ __all__ = [
     'lru_cache',
     
     # Parallel functions
-    'parallel_process'
+    'parallel_apply',
+    'parallel_extract_features',
+    'parallel_preprocess',
+    'parallel_detect_events',
+    'parallel_cross_validation',
+    'parallel_grid_search'
 ]
