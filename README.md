@@ -87,9 +87,6 @@ pytest
 If you use this software in your research, please cite:
 
 ```
-Your Name et al. (2025). QEEG: Quantitative EEG Analysis Toolkit. GitHub. https://github.com/yourusername/qeeg
+Kapeleshh KS et al. (2025). QEEG: Quantitative EEG Analysis Toolkit. GitHub. https://github.com/yourusername/qeeg
 ```
 
-## License
-
-MIT License
