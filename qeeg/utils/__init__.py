@@ -25,7 +25,7 @@ from . import parallel
 # Import key classes and functions from exceptions
 from .exceptions import (
     QEEGError,
-    PreprocessingError,
+    ProcessingError,
     AnalysisError,
     VisualizationError,
     MLError,
@@ -108,7 +108,7 @@ __all__ = [
     
     # Exception classes
     'QEEGError',
-    'PreprocessingError',
+    'ProcessingError',
     'AnalysisError',
     'VisualizationError',
     'MLError',
