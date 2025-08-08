@@ -54,18 +54,18 @@ fig = topomaps.plot_band_topomaps(raw)
   - Data preprocessing
   - Analysis execution
   - Visualization generation
-
+<!-- 
 ## Documentation
 
 Full documentation is available at [https://qeeg.readthedocs.io](https://qeeg.readthedocs.io)
-
+-->
 ## Development
 
 ### Setup Development Environment
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/qeeg.git
+git clone https://github.com/kapeleshh/qeeg.git
 cd qeeg
 
 # Create a virtual environment
@@ -87,6 +87,6 @@ pytest
 If you use this software in your research, please cite:
 
 ```
-Kapeleshh KS et al. (2025). QEEG: Quantitative EEG Analysis Toolkit. GitHub. https://github.com/yourusername/qeeg
+Kapeleshh KS et al. (2025). QEEG: Quantitative EEG Analysis Toolkit. GitHub. https://github.com/kapeleshh/qeeg
 ```
 
