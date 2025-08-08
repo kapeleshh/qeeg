@@ -1,121 +1,124 @@
-# Contributing to Qeeg
+# Contributing to QEEG
 
-Thank you for considering contributing to Qeeg! This document provides guidelines and instructions for contributing to this project.
-
-## Table of Contents
-
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Environment](#development-environment)
-- [Branching Strategy](#branching-strategy)
-- [Commit Guidelines](#commit-guidelines)
-- [Pull Request Process](#pull-request-process)
-- [Testing](#testing)
-- [Documentation](#documentation)
-- [Style Guide](#style-guide)
+Thank you for considering contributing to QEEG! This document provides guidelines and instructions for contributing to this project.
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+Please be respectful and considerate of others when contributing to this project. We aim to foster an inclusive and welcoming community.
 
-## Getting Started
+## Development Process
 
-1. Fork the repository on GitHub
-2. Clone your fork locally:
-   ```bash
-   git clone https://github.com/your-username/qeeg.git
-   cd qeeg
-   ```
-3. Set up the development environment (see below)
-4. Create a branch for your changes
-5. Make your changes
-6. Push your branch to your fork
-7. Submit a pull request
+1. **Fork the Repository**
+   - Fork the repository on GitHub
+   - Clone your fork locally: `git clone https://github.com/yourusername/qeeg.git`
+   - Add the original repository as upstream: `git remote add upstream https://github.com/originalusername/qeeg.git`
 
-## Development Environment
+2. **Create a Feature Branch**
+   - Create a branch for your feature: `git checkout -b feature-name`
+   - Make your changes in this branch
 
-1. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+3. **Development Environment**
+   - Set up a virtual environment: `python -m venv venv`
+   - Activate it: `source venv/bin/activate` (or `venv\Scripts\activate` on Windows)
+   - Install development dependencies: `pip install -e ".[dev]"`
 
-2. Install the package in development mode:
-   ```bash
-   pip install -e ".[dev]"
-   ```
+4. **Make Your Changes**
+   - Write code that follows our style guidelines
+   - Add or update tests as necessary
+   - Update documentation for any API changes
 
-3. Install pre-commit hooks:
-   ```bash
-   pre-commit install
-   ```
+5. **Run Tests**
+   - Ensure all tests pass: `pytest`
+   - Check code style: `flake8 qeeg tests`
+   - Format code: `black qeeg tests`
 
-## Branching Strategy
+6. **Submit a Pull Request**
+   - Push your changes to your fork: `git push origin feature-name`
+   - Submit a pull request from your branch to the main repository
+   - Describe your changes in detail in the pull request
 
-- `main`: The main branch contains the latest stable release
-- `develop`: The development branch contains the latest development changes
-- Feature branches: Create a new branch for each feature or bugfix
+## Code Style
 
-Name your branches according to the following convention:
-- `feature/your-feature-name`: For new features
-- `bugfix/issue-number-description`: For bug fixes
-- `docs/what-you-are-documenting`: For documentation changes
+We follow PEP 8 with a line length of 88 characters. Please use Black for formatting:
 
-## Commit Guidelines
+```bash
+pip install black
+black qeeg tests
+```
 
-- Use the present tense ("Add feature" not "Added feature")
-- Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
-- Limit the first line to 72 characters or less
-- Reference issues and pull requests liberally after the first line
-- Consider starting the commit message with an applicable emoji:
-  - ✨ `:sparkles:` when adding a new feature
-  - 🐛 `:bug:` when fixing a bug
-  - 📚 `:books:` when adding or updating documentation
-  - ♻️ `:recycle:` when refactoring code
-  - 🧪 `:test_tube:` when adding tests
-  - 🔧 `:wrench:` when updating configuration files
+For imports, we use isort:
 
-## Pull Request Process
-
-1. Update the README.md or documentation with details of changes if appropriate
-2. Add or update tests for any new or modified functionality
-3. Ensure all tests pass
-4. Update the version number in relevant files following [Semantic Versioning](https://semver.org/)
-5. You may merge the Pull Request once you have the sign-off of at least one other developer
+```bash
+pip install isort
+isort qeeg tests
+```
 
 ## Testing
 
-- Write tests for all new features and bug fixes
-- Run tests before submitting a pull request:
-  ```bash
-  pytest
-  ```
-- Aim for high test coverage:
-  ```bash
-  pytest --cov=qeeg
-  ```
+All new features should include tests. Run the test suite with:
+
+```bash
+pytest
+```
+
+For coverage reports:
+
+```bash
+pytest --cov=qeeg tests/
+```
 
 ## Documentation
 
-- Update documentation for any new or modified functionality
-- Follow the [NumPy docstring format](https://numpydoc.readthedocs.io/en/latest/format.html)
-- Build and check the documentation:
-  ```bash
-  cd docs
-  make html
-  ```
+Please update documentation for any changes to the API. We use NumPy-style docstrings:
 
-## Style Guide
+```python
+def function_name(param1, param2):
+    """
+    Short description of the function.
 
-This project follows the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide. Additionally:
+    Parameters
+    ----------
+    param1 : type
+        Description of param1
+    param2 : type
+        Description of param2
 
-- Use 4 spaces for indentation
-- Use docstrings for all public modules, functions, classes, and methods
-- Keep line length to 88 characters (compatible with Black)
-- Run linting tools before submitting:
-  ```bash
-  flake8 qeeg
-  black qeeg
-  ```
+    Returns
+    -------
+    type
+        Description of return value
+    """
+    # Function implementation
+```
 
-Thank you for contributing to Qeeg!
+## Versioning
+
+We use semantic versioning (SemVer) for this project:
+
+- MAJOR version for incompatible API changes
+- MINOR version for backwards-compatible functionality additions
+- PATCH version for backwards-compatible bug fixes
+
+During the 0.x phase, minor version increases may include breaking changes.
+
+## Issue Reporting
+
+When reporting issues, please include:
+
+- A clear description of the issue
+- Steps to reproduce
+- Expected behavior
+- Actual behavior
+- Version information (Python version, package version, OS)
+- Any relevant logs or error messages
+
+## Feature Requests
+
+For feature requests, please describe:
+
+- The problem you're trying to solve
+- Your proposed solution
+- Any alternatives you've considered
+- Any relevant context or examples
+
+Thank you for contributing to QEEG!
