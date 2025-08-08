@@ -1,6 +1,6 @@
-# Epilepsy-EEG
+# Qeeg
 
-A Python package for EEG analysis focused on epilepsy detection and neurological condition assessment.
+A Python package for quantitative EEG analysis and neurological condition assessment.
 
 ## Features
 
@@ -9,18 +9,21 @@ A Python package for EEG analysis focused on epilepsy detection and neurological
 - Asymmetry analysis
 - Brodmann area analysis
 - Epileptiform activity detection (OIRDA, FIRDA, spikes)
-- Neurological condition assessment (ADHD, depression, anxiety, etc.)
+- Neurological condition assessment (epilepsy, ADHD, depression, anxiety, etc.)
 - EEG visualization tools
+- Memory-efficient processing for large datasets
+- Performance benchmarking and optimization
+- Comprehensive validation and error handling
 
 ## Installation
 
 ```bash
 # Install from PyPI (not yet available)
-pip install epilepsy-eeg
+pip install qeeg
 
 # Install from source
-git clone https://github.com/kapeleshh/epilepsy-eeg.git
-cd epilepsy-eeg
+git clone https://github.com/kapeleshh/qeeg.git
+cd qeeg
 pip install -e .
 ```
 
@@ -28,23 +31,23 @@ pip install -e .
 
 ```python
 import mne
-import epilepsy_eeg as eeg
+import qeeg
 
 # Load EEG data
 raw = mne.io.read_raw_edf('your_eeg_file.edf', preload=True)
 
 # Preprocess the data
-raw_filtered = eeg.preprocessing.filtering.bandpass_filter(raw, l_freq=1.0, h_freq=40.0)
-raw_cleaned = eeg.preprocessing.artifacts.remove_artifacts_ica(raw_filtered)
+raw_filtered = qeeg.preprocessing.filtering.bandpass_filter(raw, l_freq=1.0, h_freq=40.0)
+raw_cleaned = qeeg.preprocessing.artifacts.remove_artifacts_ica(raw_filtered)
 
 # Perform spectral analysis
-bands = eeg.analysis.spectral.compute_band_powers(raw_cleaned)
+bands = qeeg.analysis.spectral.compute_band_powers(raw_cleaned)
 
 # Detect epileptiform activity
-spikes = eeg.analysis.epileptiform.detect_spikes(raw_cleaned)
+spikes = qeeg.analysis.epileptiform.detect_spikes(raw_cleaned)
 
 # Visualize results
-eeg.visualization.topomaps.plot_band_topomaps(bands)
+qeeg.visualization.topomaps.plot_band_topomaps(bands)
 ```
 
 ## Documentation

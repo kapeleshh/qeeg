@@ -4,14 +4,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="epilepsy_eeg",
+    name="qeeg",
     version="0.1.0",
     author="EEG Analysis Team",
     author_email="example@example.com",
-    description="A package for EEG analysis focused on epilepsy detection and neurological condition assessment",
+    description="A package for quantitative EEG analysis and neurological condition assessment",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/kapeleshh/epilepsy-eeg",
+    url="https://github.com/kapeleshh/qeeg",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
