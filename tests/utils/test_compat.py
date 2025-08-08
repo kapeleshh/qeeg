@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 import importlib
 
-from epilepsy_eeg.utils.compat import (
+from qeeg.utils.compat import (
     get_installed_version,
     check_version,
     check_dependencies,
@@ -18,7 +18,7 @@ from epilepsy_eeg.utils.compat import (
     MINIMUM_VERSIONS,
     RECOMMENDED_VERSIONS
 )
-from epilepsy_eeg.utils.exceptions import EEGError
+from qeeg.utils.exceptions import QEEGError
 
 
 def test_get_installed_version():
@@ -58,45 +58,45 @@ def test_get_installed_version():
 
 def test_check_version():
     # Test with a module that meets minimum and recommended versions
-    with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='1.2.0'):
+    with patch('qeeg.utils.compat.get_installed_version', return_value='1.2.0'):
         meets_min, meets_rec = check_version('numpy', min_version='1.0.0', recommended_version='1.1.0')
         assert meets_min is True
         assert meets_rec is True
     
     # Test with a module that meets minimum but not recommended version
-    with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='1.0.5'):
+    with patch('qeeg.utils.compat.get_installed_version', return_value='1.0.5'):
         meets_min, meets_rec = check_version('numpy', min_version='1.0.0', recommended_version='1.1.0')
         assert meets_min is True
         assert meets_rec is False
     
     # Test with a module that doesn't meet minimum version
-    with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='0.9.0'):
+    with patch('qeeg.utils.compat.get_installed_version', return_value='0.9.0'):
         meets_min, meets_rec = check_version('numpy', min_version='1.0.0', recommended_version='1.1.0')
         assert meets_min is False
         assert meets_rec is False
     
     # Test with a module that doesn't exist
-    with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value=None):
+    with patch('qeeg.utils.compat.get_installed_version', return_value=None):
         meets_min, meets_rec = check_version('nonexistent_module', min_version='1.0.0', recommended_version='1.1.0')
         assert meets_min is False
         assert meets_rec is False
     
     # Test with a module that has unknown version
-    with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='unknown'):
+    with patch('qeeg.utils.compat.get_installed_version', return_value='unknown'):
         meets_min, meets_rec = check_version('some_module', min_version='1.0.0', recommended_version='1.1.0')
         assert meets_min is True  # Assume compatible
         assert meets_rec is True  # Assume compatible
     
     # Test with default versions from MINIMUM_VERSIONS and RECOMMENDED_VERSIONS
-    with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='1.0.0'):
-        with patch.dict('epilepsy_eeg.utils.compat.MINIMUM_VERSIONS', {'numpy': '0.9.0'}):
-            with patch.dict('epilepsy_eeg.utils.compat.RECOMMENDED_VERSIONS', {'numpy': '1.1.0'}):
+    with patch('qeeg.utils.compat.get_installed_version', return_value='1.0.0'):
+        with patch.dict('qeeg.utils.compat.MINIMUM_VERSIONS', {'numpy': '0.9.0'}):
+            with patch.dict('qeeg.utils.compat.RECOMMENDED_VERSIONS', {'numpy': '1.1.0'}):
                 meets_min, meets_rec = check_version('numpy')
                 assert meets_min is True
                 assert meets_rec is False
     
     # Test with version comparison error
-    with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='1.0.0'):
+    with patch('qeeg.utils.compat.get_installed_version', return_value='1.0.0'):
         with patch('packaging.version.parse', side_effect=Exception('Test error')):
             meets_min, meets_rec = check_version('numpy', min_version='1.0.0', recommended_version='1.1.0')
             assert meets_min is True  # Default to True on error
@@ -105,36 +105,36 @@ def test_check_version():
 
 def test_check_dependencies():
     # Test with all dependencies meeting minimum versions
-    with patch('epilepsy_eeg.utils.compat.check_version', return_value=(True, False)):
-        with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='1.0.0'):
+    with patch('qeeg.utils.compat.check_version', return_value=(True, False)):
+        with patch('qeeg.utils.compat.get_installed_version', return_value='1.0.0'):
             results = check_dependencies(['numpy', 'scipy'])
             assert len(results) == 2
             assert all(info['meets_minimum'] for info in results.values())
             assert not any(info['meets_recommended'] for info in results.values())
     
     # Test with some dependencies not meeting minimum versions
-    with patch('epilepsy_eeg.utils.compat.check_version', side_effect=[(True, False), (False, False)]):
-        with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='1.0.0'):
+    with patch('qeeg.utils.compat.check_version', side_effect=[(True, False), (False, False)]):
+        with patch('qeeg.utils.compat.get_installed_version', return_value='1.0.0'):
             results = check_dependencies(['numpy', 'scipy'])
             assert results['numpy']['meets_minimum'] is True
             assert results['scipy']['meets_minimum'] is False
     
     # Test with raise_error=True and all dependencies meeting minimum versions
-    with patch('epilepsy_eeg.utils.compat.check_version', return_value=(True, False)):
-        with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='1.0.0'):
+    with patch('qeeg.utils.compat.check_version', return_value=(True, False)):
+        with patch('qeeg.utils.compat.get_installed_version', return_value='1.0.0'):
             results = check_dependencies(['numpy', 'scipy'], raise_error=True)
             assert len(results) == 2
     
     # Test with raise_error=True and some dependencies not meeting minimum versions
-    with patch('epilepsy_eeg.utils.compat.check_version', side_effect=[(True, False), (False, False)]):
-        with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='1.0.0'):
-            with pytest.raises(EEGError):
+    with patch('qeeg.utils.compat.check_version', side_effect=[(True, False), (False, False)]):
+        with patch('qeeg.utils.compat.get_installed_version', return_value='1.0.0'):
+            with pytest.raises(QEEGError):
                 check_dependencies(['numpy', 'scipy'], raise_error=True)
     
     # Test with default dependencies from MINIMUM_VERSIONS
-    with patch('epilepsy_eeg.utils.compat.check_version', return_value=(True, False)):
-        with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='1.0.0'):
-            with patch.dict('epilepsy_eeg.utils.compat.MINIMUM_VERSIONS', {'numpy': '0.9.0', 'scipy': '0.9.0'}):
+    with patch('qeeg.utils.compat.check_version', return_value=(True, False)):
+        with patch('qeeg.utils.compat.get_installed_version', return_value='1.0.0'):
+            with patch.dict('qeeg.utils.compat.MINIMUM_VERSIONS', {'numpy': '0.9.0', 'scipy': '0.9.0'}):
                 results = check_dependencies()
                 assert len(results) == 2
                 assert 'numpy' in results
@@ -143,55 +143,55 @@ def test_check_dependencies():
 
 def test_get_mne_version():
     # Test with MNE installed
-    with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='1.0.0'):
+    with patch('qeeg.utils.compat.get_installed_version', return_value='1.0.0'):
         version = get_mne_version()
         assert version == '1.0.0'
     
     # Test with MNE not installed
-    with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value=None):
+    with patch('qeeg.utils.compat.get_installed_version', return_value=None):
         version = get_mne_version()
         assert version is None
 
 
 def test_check_mne_version():
     # Test with MNE meeting minimum version
-    with patch('epilepsy_eeg.utils.compat.check_version', return_value=(True, False)):
+    with patch('qeeg.utils.compat.check_version', return_value=(True, False)):
         result = check_mne_version('1.0.0')
         assert result is True
     
     # Test with MNE not meeting minimum version
-    with patch('epilepsy_eeg.utils.compat.check_version', return_value=(False, False)):
+    with patch('qeeg.utils.compat.check_version', return_value=(False, False)):
         result = check_mne_version('1.0.0')
         assert result is False
 
 
 def test_get_sklearn_version():
     # Test with scikit-learn installed
-    with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value='1.0.0'):
+    with patch('qeeg.utils.compat.get_installed_version', return_value='1.0.0'):
         version = get_sklearn_version()
         assert version == '1.0.0'
     
     # Test with scikit-learn not installed
-    with patch('epilepsy_eeg.utils.compat.get_installed_version', return_value=None):
+    with patch('qeeg.utils.compat.get_installed_version', return_value=None):
         version = get_sklearn_version()
         assert version is None
 
 
 def test_check_sklearn_version():
     # Test with scikit-learn meeting minimum version
-    with patch('epilepsy_eeg.utils.compat.check_version', return_value=(True, False)):
+    with patch('qeeg.utils.compat.check_version', return_value=(True, False)):
         result = check_sklearn_version('0.24.0')
         assert result is True
     
     # Test with scikit-learn not meeting minimum version
-    with patch('epilepsy_eeg.utils.compat.check_version', return_value=(False, False)):
+    with patch('qeeg.utils.compat.check_version', return_value=(False, False)):
         result = check_sklearn_version('0.24.0')
         assert result is False
 
 
 def test_print_dependency_status(capsys):
     # Test printing dependency status
-    with patch('epilepsy_eeg.utils.compat.check_dependencies') as mock_check:
+    with patch('qeeg.utils.compat.check_dependencies') as mock_check:
         mock_check.return_value = {
             'numpy': {
                 'installed_version': '1.20.0',

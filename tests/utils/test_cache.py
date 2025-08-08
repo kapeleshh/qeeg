@@ -9,7 +9,7 @@ import tempfile
 import shutil
 from unittest.mock import patch, MagicMock
 
-from epilepsy_eeg.utils.cache import (
+from qeeg.utils.cache import (
     get_cache_dir,
     clear_cache,
     get_cache_size,
@@ -25,7 +25,7 @@ def test_get_cache_dir():
     cache_dir = get_cache_dir()
     assert os.path.exists(cache_dir)
     assert os.path.isdir(cache_dir)
-    assert cache_dir.endswith('.epilepsy_eeg_cache')
+    assert cache_dir.endswith('.qeeg_cache')
 
 
 def test_clear_cache():
@@ -37,7 +37,7 @@ def test_clear_cache():
                 f.write(f"Test file {i}")
         
         # Patch get_cache_dir to return our temporary directory
-        with patch('epilepsy_eeg.utils.cache.get_cache_dir', return_value=temp_dir):
+        with patch('qeeg.utils.cache.get_cache_dir', return_value=temp_dir):
             # Test clearing all files
             n_removed = clear_cache()
             assert n_removed == 5
@@ -67,7 +67,7 @@ def test_get_cache_size():
                 f.write(f"Test file {i}" * 100)  # Make files have some size
         
         # Patch get_cache_dir to return our temporary directory
-        with patch('epilepsy_eeg.utils.cache.get_cache_dir', return_value=temp_dir):
+        with patch('qeeg.utils.cache.get_cache_dir', return_value=temp_dir):
             # Test getting cache size
             size_info = get_cache_size()
             assert size_info['n_files'] == 5
@@ -79,7 +79,7 @@ def test_cache_result():
     # Create a temporary directory to use as cache
     with tempfile.TemporaryDirectory() as temp_dir:
         # Patch get_cache_dir to return our temporary directory
-        with patch('epilepsy_eeg.utils.cache.get_cache_dir', return_value=temp_dir):
+        with patch('qeeg.utils.cache.get_cache_dir', return_value=temp_dir):
             # Create a test function with a counter to track calls
             counter = {'count': 0}
             
@@ -108,7 +108,7 @@ def test_cache_result_with_expiry():
     # Create a temporary directory to use as cache
     with tempfile.TemporaryDirectory() as temp_dir:
         # Patch get_cache_dir to return our temporary directory
-        with patch('epilepsy_eeg.utils.cache.get_cache_dir', return_value=temp_dir):
+        with patch('qeeg.utils.cache.get_cache_dir', return_value=temp_dir):
             # Create a test function with a counter to track calls
             counter = {'count': 0}
             

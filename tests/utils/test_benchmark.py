@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from unittest.mock import patch, MagicMock
 
-from epilepsy_eeg.utils.benchmark import (
+from qeeg.utils.benchmark import (
     timeit,
     benchmark_function,
     plot_benchmark_results,
@@ -92,7 +92,7 @@ def test_compare_functions():
         return x ** 3
     
     # Test comparing functions with default parameters
-    with patch('epilepsy_eeg.utils.benchmark.plot_benchmark_results') as mock_plot:
+    with patch('qeeg.utils.benchmark.plot_benchmark_results') as mock_plot:
         results = compare_functions(
             {'func1': func1, 'func2': func2},
             args_list=[(10,), (10,)],
@@ -127,10 +127,10 @@ def test_benchmark_preprocessing_pipeline():
     pipeline_steps = [step1, step2]
     
     # Test benchmarking the pipeline
-    with patch('epilepsy_eeg.utils.benchmark.benchmark_function') as mock_benchmark:
+    with patch('qeeg.utils.benchmark.benchmark_function') as mock_benchmark:
         mock_benchmark.return_value = {'mean': 0.1, 'std': 0.01, 'min': 0.09, 'max': 0.11, 'median': 0.1, 'times': [0.1]}
         
-        with patch('epilepsy_eeg.utils.benchmark.plot_benchmark_results') as mock_plot:
+        with patch('qeeg.utils.benchmark.plot_benchmark_results') as mock_plot:
             results = benchmark_preprocessing_pipeline(raw, pipeline_steps, n_runs=2, show=False)
             
             # Check that benchmark_function was called for each step
@@ -172,8 +172,8 @@ def test_benchmark_memory_usage():
         assert results['net'] >= 0
     
     # Test with psutil not available
-    with patch('epilepsy_eeg.utils.benchmark.psutil', None):
-        with patch('epilepsy_eeg.utils.benchmark.logger') as mock_logger:
+    with patch('qeeg.utils.benchmark.psutil', None):
+        with patch('qeeg.utils.benchmark.logger') as mock_logger:
             results = benchmark_memory_usage(test_func, n_runs=2)
             
             # Check that a warning was logged
