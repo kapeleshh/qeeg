@@ -37,10 +37,13 @@ from .logging import setup_logger, get_logger
 
 # Import key functions from memory
 from .memory import (
-    process_in_chunks,
-    estimate_memory_usage,
-    check_memory_limit,
-    suggest_chunk_size
+    get_memory_usage,
+    memory_usage,
+    estimate_memory_requirement,
+    check_memory_available,
+    process_large_eeg,
+    reduce_data_resolution,
+    MemoryMonitor
 )
 
 # Import key functions from compat
@@ -117,10 +120,13 @@ __all__ = [
     'get_logger',
     
     # Memory functions
-    'process_in_chunks',
-    'estimate_memory_usage',
-    'check_memory_limit',
-    'suggest_chunk_size',
+    'get_memory_usage',
+    'memory_usage',
+    'estimate_memory_requirement',
+    'check_memory_available',
+    'process_large_eeg',
+    'reduce_data_resolution',
+    'MemoryMonitor',
     
     # Compatibility functions
     'check_dependencies',
