@@ -5,172 +5,273 @@ Tests for the memory module.
 import pytest
 import numpy as np
 import mne
+import psutil
+import time
 from unittest.mock import patch, MagicMock
 
-from epilepsy_eeg.utils.memory import (
-    process_in_chunks,
-    estimate_memory_usage,
-    check_memory_limit,
-    suggest_chunk_size
+from qeeg.utils.memory import (
+    get_memory_usage,
+    memory_usage,
+    estimate_memory_requirement,
+    check_memory_available,
+    process_large_eeg,
+    reduce_data_resolution,
+    MemoryMonitor
 )
-from epilepsy_eeg.utils.exceptions import EEGError
+from qeeg.utils.exceptions import ProcessingError
 
 
-def create_test_raw():
-    """Create a test Raw object for testing."""
-    data = np.random.randn(2, 1000)
-    info = mne.create_info(['ch1', 'ch2'], 100, 'eeg')
-    return mne.io.RawArray(data, info)
+def create_test_raw(n_channels=5, n_samples=1000, sfreq=100):
+    """Create a test MNE Raw object with simulated EEG data."""
+    # Create simulated data
+    data = np.random.randn(n_channels, n_samples)
+    
+    # Create MNE Raw object
+    ch_names = [f'CH{i}' for i in range(n_channels)]
+    ch_types = ['eeg'] * n_channels
+    info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
+    raw = mne.io.RawArray(data, info)
+    
+    return raw
 
 
-def test_process_in_chunks():
-    # Create a test Raw object
-    raw = create_test_raw()
+def test_get_memory_usage():
+    """Test the get_memory_usage function."""
+    # Get memory usage
+    usage = get_memory_usage()
     
-    # Define a test function to apply to chunks
-    def test_func(raw_chunk):
-        return raw_chunk.get_data().mean()
+    # Check that the result is a dictionary
+    assert isinstance(usage, dict)
     
-    # Test processing in chunks
-    results = process_in_chunks(raw, chunk_size_seconds=0.5, func=test_func)
+    # Check that the dictionary contains the expected keys
+    assert 'rss' in usage
+    assert 'vms' in usage
+    assert 'percent' in usage
+    assert 'available' in usage
     
-    # Should return a list of results
-    assert isinstance(results, float)  # Combined result
+    # Check that the values are of the expected types
+    assert isinstance(usage['rss'], float)
+    assert isinstance(usage['vms'], float)
+    assert isinstance(usage['percent'], float)
+    assert isinstance(usage['available'], float)
     
-    # Test processing in chunks without combining results
-    results = process_in_chunks(raw, chunk_size_seconds=0.5, func=test_func, combine_results=False)
-    
-    # Should return a list of results
-    assert isinstance(results, list)
-    assert len(results) > 1
-    
-    # Test with overlap
-    results = process_in_chunks(raw, chunk_size_seconds=0.5, overlap_seconds=0.1, func=test_func)
-    assert isinstance(results, float)
-    
-    # Test with invalid parameters
-    with pytest.raises(ValueError):
-        process_in_chunks(raw, chunk_size_seconds=0, func=test_func)
-    
-    with pytest.raises(ValueError):
-        process_in_chunks(raw, chunk_size_seconds=0.5, overlap_seconds=0.5, func=test_func)
-    
-    with pytest.raises(TypeError):
-        process_in_chunks("not a raw object", chunk_size_seconds=0.5, func=test_func)
-    
-    # Test with a function that raises an exception
-    def failing_func(raw_chunk):
-        raise ValueError("Test error")
-    
-    with pytest.raises(EEGError):
-        process_in_chunks(raw, chunk_size_seconds=0.5, func=failing_func)
+    # Check that the values are reasonable
+    assert usage['rss'] > 0
+    assert usage['vms'] > 0
+    assert 0 <= usage['percent'] <= 100
+    assert usage['available'] > 0
 
 
-def test_process_in_chunks_with_dict_results():
-    # Create a test Raw object
-    raw = create_test_raw()
+def test_memory_usage_decorator():
+    """Test the memory_usage decorator."""
+    # Define a function with the decorator
+    @memory_usage
+    def test_func():
+        # Allocate some memory
+        x = [0] * 1000000
+        return x
     
-    # Define a test function that returns a dictionary
-    def test_func(raw_chunk):
-        data = raw_chunk.get_data()
-        return {
-            'mean': data.mean(),
-            'std': data.std()
-        }
-    
-    # Test processing in chunks with dictionary results
-    results = process_in_chunks(raw, chunk_size_seconds=0.5, func=test_func)
-    
-    # Should return a combined dictionary
-    assert isinstance(results, dict)
-    assert 'mean' in results
-    assert 'std' in results
-    
-    # Test without combining results
-    results = process_in_chunks(raw, chunk_size_seconds=0.5, func=test_func, combine_results=False)
-    
-    # Should return a list of dictionaries
-    assert isinstance(results, list)
-    assert all(isinstance(r, dict) for r in results)
+    # Capture stdout to check the output
+    with patch('builtins.print') as mock_print:
+        # Call the function
+        result = test_func()
+        
+        # Check that the function returned the expected result
+        assert len(result) == 1000000
+        
+        # Check that print was called with memory usage information
+        assert mock_print.call_count >= 3
+        
+        # Check that the output contains the expected information
+        for call in mock_print.call_args_list:
+            args, _ = call
+            arg = args[0]
+            if "Memory usage for test_func" in arg:
+                break
+        else:
+            assert False, "Memory usage information not printed"
 
 
-def test_estimate_memory_usage():
-    # Create a test Raw object
-    raw = create_test_raw()
+def test_estimate_memory_requirement():
+    """Test the estimate_memory_requirement function."""
+    # Create a test raw object
+    raw = create_test_raw(n_channels=10, n_samples=10000)
     
-    # Test estimating memory usage for different operations
-    filter_usage = estimate_memory_usage(raw, operation='filter')
-    ica_usage = estimate_memory_usage(raw, operation='ica')
-    psd_usage = estimate_memory_usage(raw, operation='psd')
-    epochs_usage = estimate_memory_usage(raw, operation='epochs')
+    # Estimate memory requirement for different operations
+    copy_mem = estimate_memory_requirement(raw, 'copy')
+    filter_mem = estimate_memory_requirement(raw, 'filter')
+    ica_mem = estimate_memory_requirement(raw, 'ica')
+    epoch_mem = estimate_memory_requirement(raw, 'epoch')
     
     # Check that the estimates are reasonable
-    assert filter_usage['total'] > 0
-    assert ica_usage['total'] > 0
-    assert psd_usage['total'] > 0
-    assert epochs_usage['total'] > 0
+    assert copy_mem > 0
+    assert filter_mem > copy_mem  # Filtering should require more memory than copying
+    assert ica_mem > copy_mem  # ICA should require more memory than copying
+    assert epoch_mem > 0
     
-    # Check that the estimates include the expected keys
-    for usage in [filter_usage, ica_usage, psd_usage, epochs_usage]:
-        assert 'raw_data_mb' in usage
-        assert 'operation_data_mb' in usage
-        assert 'total' in usage
-    
-    # Test with invalid operation
-    with pytest.raises(ValueError):
-        estimate_memory_usage(raw, operation='invalid_operation')
-    
-    # Test with invalid raw object
-    with pytest.raises(TypeError):
-        estimate_memory_usage("not a raw object", operation='filter')
+    # Check that the default operation is handled
+    default_mem = estimate_memory_requirement(raw, 'unknown')
+    assert default_mem > 0
 
 
-def test_check_memory_limit():
-    # Test with memory usage below limit
-    assert check_memory_limit(100, limit_mb=200) is True
+def test_check_memory_available():
+    """Test the check_memory_available function."""
+    # Get available memory
+    available_mb = psutil.virtual_memory().available / (1024 * 1024)
     
-    # Test with memory usage above limit
-    assert check_memory_limit(300, limit_mb=200) is False
+    # Check with a small requirement
+    assert check_memory_available(1.0)
     
-    # Test with automatic limit detection
-    with patch('psutil.virtual_memory') as mock_vm:
-        # Mock available memory to be 1000 MB
-        mock_vm.return_value.available = 1000 * 1024 * 1024
-        
-        # Test with memory usage below 80% of available memory
-        assert check_memory_limit(700) is True
-        
-        # Test with memory usage above 80% of available memory
-        assert check_memory_limit(900) is False
+    # Check with a requirement just below available memory
+    assert check_memory_available(available_mb * 0.5)
+    
+    # Check with a requirement above available memory
+    assert not check_memory_available(available_mb * 2.0)
+    
+    # Check with different threshold ratios
+    assert check_memory_available(available_mb * 0.9, threshold_ratio=1.0)
+    assert not check_memory_available(available_mb * 0.9, threshold_ratio=0.5)
 
 
-def test_suggest_chunk_size():
-    # Create a test Raw object
-    raw = create_test_raw()
+def test_process_large_eeg():
+    """Test the process_large_eeg function."""
+    # Create a test raw object
+    raw = create_test_raw(n_channels=5, n_samples=10000, sfreq=100)
     
-    # Test suggesting chunk size for different operations
-    filter_chunk = suggest_chunk_size(raw, operation='filter', memory_limit_mb=100)
-    ica_chunk = suggest_chunk_size(raw, operation='ica', memory_limit_mb=100)
-    psd_chunk = suggest_chunk_size(raw, operation='psd', memory_limit_mb=100)
-    epochs_chunk = suggest_chunk_size(raw, operation='epochs', memory_limit_mb=100)
+    # Define a simple processing function
+    def multiply_data(raw, factor=2.0):
+        data = raw.get_data() * factor
+        info = raw.info.copy()
+        return mne.io.RawArray(data, info)
     
-    # Check that the suggestions are reasonable
-    assert filter_chunk > 0
-    assert ica_chunk > 0
-    assert psd_chunk > 0
-    assert epochs_chunk > 0
+    # Process the data
+    processed = process_large_eeg(raw, multiply_data, chunk_duration=0.5, overlap=0.1, factor=2.0)
     
-    # Check that more memory-intensive operations suggest smaller chunks
-    assert ica_chunk <= filter_chunk
+    # Check that the output is a Raw object
+    assert isinstance(processed, mne.io.Raw)
     
-    # Test with automatic memory limit detection
-    with patch('psutil.virtual_memory') as mock_vm:
-        # Mock available memory to be 1000 MB
-        mock_vm.return_value.available = 1000 * 1024 * 1024
-        
-        chunk_size = suggest_chunk_size(raw, operation='filter')
-        assert chunk_size > 0
+    # Check that the data has been modified
+    assert not np.array_equal(raw.get_data(), processed.get_data())
     
-    # Test with invalid raw object
-    with pytest.raises(TypeError):
-        suggest_chunk_size("not a raw object", operation='filter')
+    # Check that the data has been multiplied by 2
+    np.testing.assert_allclose(processed.get_data(), raw.get_data() * 2.0)
+    
+    # Check that the function works with a single chunk
+    processed = process_large_eeg(raw, multiply_data, chunk_duration=200.0, factor=3.0)
+    np.testing.assert_allclose(processed.get_data(), raw.get_data() * 3.0)
+    
+    # Check that the function raises an error if the data is not preloaded
+    raw_copy = raw.copy()
+    raw_copy.preload = False
+    with pytest.raises(ProcessingError):
+        process_large_eeg(raw_copy, multiply_data)
+    
+    # Check that the function handles errors in the processing function
+    def failing_func(raw):
+        raise ValueError("Test error")
+    
+    with pytest.raises(ProcessingError):
+        process_large_eeg(raw, failing_func)
+
+
+def test_reduce_data_resolution():
+    """Test the reduce_data_resolution function."""
+    # Create a test raw object
+    raw = create_test_raw(n_channels=5, n_samples=10000, sfreq=100)
+    
+    # Reduce resolution using decimate
+    raw_decimated = reduce_data_resolution(raw, factor=2, method='decimate')
+    
+    # Check that the output is a Raw object
+    assert isinstance(raw_decimated, mne.io.Raw)
+    
+    # Check that the sampling rate has been reduced
+    assert raw_decimated.info['sfreq'] == raw.info['sfreq'] / 2
+    
+    # Check that the number of samples has been reduced
+    assert raw_decimated.n_times == raw.n_times / 2
+    
+    # Reduce resolution using resample
+    raw_resampled = reduce_data_resolution(raw, factor=4, method='resample')
+    
+    # Check that the sampling rate has been reduced
+    assert raw_resampled.info['sfreq'] == raw.info['sfreq'] / 4
+    
+    # Check that the function raises an error if the data is not preloaded
+    raw_copy = raw.copy()
+    raw_copy.preload = False
+    with pytest.raises(ProcessingError):
+        reduce_data_resolution(raw_copy)
+    
+    # Check that the function raises an error for unknown methods
+    with pytest.raises(ProcessingError):
+        reduce_data_resolution(raw, method='unknown')
+
+
+def test_memory_monitor():
+    """Test the MemoryMonitor class."""
+    # Create a memory monitor
+    monitor = MemoryMonitor(warning_threshold=0.0, error_threshold=100.0)
+    
+    # Check initial state
+    assert not monitor.monitoring
+    assert monitor._thread is None
+    
+    # Start monitoring
+    monitor.start()
+    
+    # Check that monitoring has started
+    assert monitor.monitoring
+    assert monitor._thread is not None
+    
+    # Check memory usage
+    usage = monitor.check()
+    
+    # Check that the result is a dictionary
+    assert isinstance(usage, dict)
+    
+    # Check that the dictionary contains the expected keys
+    assert 'total' in usage
+    assert 'available' in usage
+    assert 'used' in usage
+    assert 'percent' in usage
+    
+    # Stop monitoring
+    monitor.stop()
+    
+    # Check that monitoring has stopped
+    assert not monitor.monitoring
+    
+    # Test context manager
+    with MemoryMonitor() as m:
+        assert m.monitoring
+    
+    assert not m.monitoring
+
+
+def test_memory_monitor_warnings():
+    """Test that MemoryMonitor raises warnings when memory usage exceeds thresholds."""
+    # Create a memory monitor with a low warning threshold
+    monitor = MemoryMonitor(warning_threshold=0.0, error_threshold=100.0)
+    
+    # Check should raise a warning
+    with pytest.warns(UserWarning):
+        monitor.check()
+
+
+def test_memory_monitor_errors():
+    """Test that MemoryMonitor raises errors when memory usage exceeds thresholds."""
+    # Mock psutil.virtual_memory to return high memory usage
+    mock_vm = MagicMock()
+    mock_vm.percent = 95.0
+    mock_vm.total = 16 * 1024 * 1024 * 1024  # 16 GB
+    mock_vm.available = 1 * 1024 * 1024 * 1024  # 1 GB
+    mock_vm.used = 15 * 1024 * 1024 * 1024  # 15 GB
+    
+    # Create a memory monitor with a low error threshold
+    monitor = MemoryMonitor(warning_threshold=0.0, error_threshold=90.0)
+    
+    # Check should raise an error
+    with patch('psutil.virtual_memory', return_value=mock_vm):
+        with pytest.raises(MemoryError):
+            monitor.check()
