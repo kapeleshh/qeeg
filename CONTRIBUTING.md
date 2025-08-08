@@ -1,6 +1,6 @@
-# Contributing to Epilepsy-EEG
+# Contributing to Qeeg
 
-Thank you for considering contributing to Epilepsy-EEG! This document provides guidelines and instructions for contributing to this project.
+Thank you for considering contributing to Qeeg! This document provides guidelines and instructions for contributing to this project.
 
 ## Table of Contents
 
@@ -23,8 +23,8 @@ This project and everyone participating in it is governed by our Code of Conduct
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/your-username/epilepsy-eeg.git
-   cd epilepsy-eeg
+   git clone https://github.com/your-username/qeeg.git
+   cd qeeg
    ```
 3. Set up the development environment (see below)
 4. Create a branch for your changes
@@ -92,7 +92,7 @@ Name your branches according to the following convention:
   ```
 - Aim for high test coverage:
   ```bash
-  pytest --cov=epilepsy_eeg
+  pytest --cov=qeeg
   ```
 
 ## Documentation
@@ -114,8 +114,8 @@ This project follows the [PEP 8](https://www.python.org/dev/peps/pep-0008/) styl
 - Keep line length to 88 characters (compatible with Black)
 - Run linting tools before submitting:
   ```bash
-  flake8 epilepsy_eeg
-  black epilepsy_eeg
+  flake8 qeeg
+  black qeeg
   ```
 
-Thank you for contributing to Epilepsy-EEG!
+Thank you for contributing to Qeeg!
