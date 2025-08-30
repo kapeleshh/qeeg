@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  qeeg:
+    build: .
+    volumes:
+      - .:/app
+      - ./examples/output:/app/examples/output
+    environment:
+      - PYTHONPATH=/app
+    command: bash
+    tty: true
+    stdin_open: true
